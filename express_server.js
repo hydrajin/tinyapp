@@ -26,3 +26,7 @@ app.listen(PORT, () => {
 
 // * Visit: localhost:8080/urls.json {"b2xVn2":"http://www.lighthouselabs.ca","9sm5xK":"http://www.google.com"}
 // Use cURL to fetch the url: curl -i http://localhost:8080/hello
+
+// * Will a variable that is created in one request be accessible in another?
+/* a is not accessible in the other function/callback. The user will NOT see a set to 1 in /fetch.
+In fact, a is not defined in this scope, and will result in a reference error when anyone visits that URL. */
