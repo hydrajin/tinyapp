@@ -10,6 +10,12 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// Needs to come BEFORE all our routes.
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
+// Converts the req. body from a buffer into a string (which we can read)
+// data in the input field wil be available to us in the req.body.longURL variable, which we can store in our urlDatabase object (Later)
+
 app.get("/", (req, res) => {
   // registers a handler on the root path "/""
   res.send("Hello!");
@@ -47,6 +53,13 @@ app.get("/urls/:shortURL", (req, res) => {
   // Fixed the longURL: (urlData)
   res.render("urls_show", templateVars);
 });
+
+// Need a POST request to submit new urls/form data
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
+// Sends an OK message when submitted, { longURL: 'www.pokemon.com'} in terminal
 
 
 // * Visit: localhost:8080/urls.json {"b2xVn2":"http://www.lighthouselabs.ca","9sm5xK":"http://www.google.com"}
