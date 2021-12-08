@@ -20,9 +20,11 @@
     <main style="margin: 1em;">
       <h3>Create TinyURL</h3>
       <form class="form-inline" action="/urls" method="POST">
+        <!--2 important attributes: action and method. Action:(tells the form which url to submit) - Method: (tells the form which HTTP method to use) -->
         <div class="form-group mb-2">
           <label for="longURL">Enter a URL:</label>
           <input class="form-control" type="text" name="longURL" placeholder="http://" style="width: 300px; margin: 1em">
+          <!--Important attribute: name (identifies data we are sending, adds the key longURL to the data we'll be sending in the body of POST req.)-->
           <button type="submit" class="btn btn-primary">Submit</button>
         </div>
       </form>

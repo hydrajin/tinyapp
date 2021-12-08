@@ -27,13 +27,20 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-// add a new rout handler for "/urls" and use res.render() to pass the URL data to our template
+// add a new route handler for "/urls" and use res.render() to pass the URL data to our template
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 // templateVars object contains the object urlDatabase? under the key urls
 // We then pass the templateVars object to the template calls urls_index
+
+// Need 2 new routes: GET route to render urls_new.ejs (presents form to user)
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+// the order of the route definition matters! (Get /urls/new needs to be defined before GET /urls/:id)
+// A good rule of thumb to follow: Routes should be ordered from MOST specific to LEAST specific
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
