@@ -5,6 +5,12 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 // set ejs as the view engine
 
+// For now place it in the out-most (global) scope
+function generateRandomString() {
+  return Math.random().toString(36).substr(2, 6);
+  // Found on stackoverflow
+};
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
