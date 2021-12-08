@@ -19,7 +19,7 @@ const urlDatabase = {
 
 // Needs to come BEFORE all our routes.
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 // Converts the req. body from a buffer into a string (which we can read)
 // data in the input field wil be available to us in the req.body.longURL variable, which we can store in our urlDatabase object (Later)
 
@@ -34,10 +34,6 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
 });
 
 // add a new route handler for "/urls" and use res.render() to pass the URL data to our template
@@ -62,16 +58,32 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 // Need a POST request to submit new urls/form data
+// Update the server so that shortURL-longURL key-value pairs are saved to the urlDatabase when it recieves a POST request to /urls
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+
+  // Generate the new shortURL
+  let shortURL = generateRandomString(); // makes the random short URL
+  urlDatabase[shortURL] = req.body.longURL; // readable string from bodyParser that is stored in our database
+  // Respond with a redirect to /urls/:shortURL (shortURL is the string we created)
+  res.redirect(`/urls/${shortURL}`);
+
 });
 // Sends an OK message when submitted, { longURL: 'www.pokemon.com'} in terminal
 
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
+//Should be at the bottom?
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
 
 // * Visit: localhost:8080/urls.json {"b2xVn2":"http://www.lighthouselabs.ca","9sm5xK":"http://www.google.com"}
 // Use cURL to fetch the url: curl -i http://localhost:8080/hello
- 
+
 // * Will a variable that is created in one request be accessible in another?
 /* a is not accessible in the other function/callback. The user will NOT see a set to 1 in /fetch.
 In fact, a is not defined in this scope, and will result in a reference error when anyone visits that URL. */
