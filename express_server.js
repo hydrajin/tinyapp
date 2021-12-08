@@ -35,6 +35,12 @@ app.get("/urls", (req, res) => {
 // templateVars object contains the object urlDatabase? under the key urls
 // We then pass the templateVars object to the template calls urls_index
 
+app.get("/urls/:shortURL", (req, res) => {
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  // Fixed the longURL: (urlData)
+  res.render("urls_show", templateVars);
+});
+
 
 // * Visit: localhost:8080/urls.json {"b2xVn2":"http://www.lighthouselabs.ca","9sm5xK":"http://www.google.com"}
 // Use cURL to fetch the url: curl -i http://localhost:8080/hello
