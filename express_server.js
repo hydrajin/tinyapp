@@ -6,7 +6,8 @@ app.set("view engine", "ejs");
 // set ejs as the view engine
 
 // For now place it in the out-most (global) scope
-function generateRandomString() {
+// eslint wanted a named function?
+const generateRandomString = () => {
   return Math.random().toString(36).substr(2, 6);
   // Found on stackoverflow
 };
