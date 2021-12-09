@@ -76,6 +76,15 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+// Add a POST rout that removes a URL resource: POST /urls/:shortURL/delete
+app.post("/urls/:shortURL/delete", (req, res) => {
+  // ! I was missing the "/" before urls! make not for next time!
+  // Nally lecture (1:31:43)
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
+});
+
 //Should be at the bottom?
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
