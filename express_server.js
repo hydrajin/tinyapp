@@ -76,13 +76,22 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-// Add a POST rout that removes a URL resource: POST /urls/:shortURL/delete
+// Add a POST route that removes a URL resource: POST /urls/:shortURL/delete
 app.post("/urls/:shortURL/delete", (req, res) => {
   // ! I was missing the "/" before urls! make not for next time!
   // Nally lecture (1:31:43)
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
+});
+
+// Add a POST route to edit already existing URL resource (to an already short URL?)
+app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  // console.log(urlDatabase[shortURL]);
+  urlDatabase[shortURL] = req.body.longURL;
+  // Changes existing shortURL to a NEW longURL
+  res.redirect("/urls/");
 });
 
 //Should be at the bottom?
