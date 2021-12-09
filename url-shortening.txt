@@ -1,0 +1,25 @@
+Validate
+Let's test what happens when we make a request to a shortened URL. A great tool for this sort of API testing is curl which we can use directly from our terminal.
+
+Test that the redirect works.
+
+In your terminal, enter the following command: curl -i http://localhost:8080/u/b2xVn2
+Inspect the response from our server, what response code did we receive?
+ HTTP response Status Code: 302 (Redirect)
+
+Repeat the test, this time with the -L flag in the command: curl -L http://localhost:8080/u/b2xVn2
+Inspect the response, what did we get back this time?
+  ???
+Head on over to the curl documentation, what's the difference between the -i and -L options?
+-i or -head (Print the title without without the body of the document)
+
+-L or --location (Follow curl redirect using HTTP location header)
+
+Finally, lets test the http://localhost:8080/u/b2xVn2 url in our browser.
+At this point we should see cURL and our browser make redirected GET requests to the longURL. We can now review our code and consider edge cases such as:
+
+What would happen if a client requests a non-existent shortURL?
+
+What happens to the urlDatabase when the server is restarted?
+
+What type of status code do our redirects have? What does this status code mean?
