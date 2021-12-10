@@ -1,6 +1,9 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const cookieParser = require("cookie-parser");
+
+app.use(cookieParser()); // I didn't add this after declaring cookie parser...
 
 app.set("view engine", "ejs");
 // set ejs as the view engine
@@ -19,6 +22,7 @@ const urlDatabase = {
 
 // Needs to come BEFORE all our routes.
 const bodyParser = require("body-parser");
+const { restart } = require("nodemon");
 app.use(bodyParser.urlencoded({ extended: true }));
 // Converts the req. body from a buffer into a string (which we can read)
 // data in the input field wil be available to us in the req.body.longURL variable, which we can store in our urlDatabase object (Later)
@@ -38,7 +42,8 @@ app.get("/hello", (req, res) => {
 
 // add a new route handler for "/urls" and use res.render() to pass the URL data to our template
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  console.log("username", req.cookies);
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
   res.render("urls_index", templateVars);
 });
 // templateVars object contains the object urlDatabase? under the key urls
@@ -46,13 +51,15 @@ app.get("/urls", (req, res) => {
 
 // Need 2 new routes: GET route to render urls_new.ejs (presents form to user)
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 // the order of the route definition matters! (Get /urls/new needs to be defined before GET /urls/:id)
 // A good rule of thumb to follow: Routes should be ordered from MOST specific to LEAST specific
+// HAD to add a template vars to this route in order to get code/username working!! 
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
   // Fixed the longURL: (urlData)
   res.render("urls_show", templateVars);
 });
@@ -78,7 +85,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Add a POST route that removes a URL resource: POST /urls/:shortURL/delete
 app.post("/urls/:shortURL/delete", (req, res) => {
-  // ! I was missing the "/" before urls! make not for next time!
+  // ! I was missing the "/" before urls! make note for next time!
   // Nally lecture (1:31:43)
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
@@ -91,7 +98,24 @@ app.post("/urls/:shortURL", (req, res) => {
   // console.log(urlDatabase[shortURL]);
   urlDatabase[shortURL] = req.body.longURL;
   // Changes existing shortURL to a NEW longURL
-  res.redirect("/urls/");
+  res.redirect("/urls");
+});
+
+// Add a POST route to a login page
+app.post("/login", (req, res) => {
+  let username = req.body.username;
+  res.cookie("username", username);
+  // console.log("Cookie Created!", req.cookies["username"]);
+  //res.cookie("username", username, { expires: new Date(Date.now() + 900000), httpOnly: true });
+  // res.send("SUCESSFULLY LOGGED IN!");
+  res.redirect("/urls");
+});
+
+// Add a POST route to logout
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  // Make sure to use "username" with quotes...
+  res.redirect("/urls");
 });
 
 //Should be at the bottom?

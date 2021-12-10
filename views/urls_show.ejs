@@ -16,8 +16,7 @@
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %>
         </h5>
-        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>">
-            <%= shortURL %>
+        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %>
           </a></p>
       </div>
       <div class="card-footer text-muted"></div>
@@ -27,8 +26,7 @@
           <!-- I was mising the <%= shortURL %> in action. It was not removing the old urls after editing -->
           <div class="text-center>
         <label for=" longURL" color="grey">New URL:</label>
-            <input class="form-control" type="text" name="longURL" placeholder="http://"
-              style="width: 250px; margin: 1em">
+            <input class="form-control" type="text" name="longURL" placeholder="http://" style="width: 250px; margin: 1em">
             <!--Important attribute: name (identifies data we are sending, adds the key longURL to the data we'll be sending in the body of POST req.)-->
             <button type="submit" class="btn btn-primary">Submit</button>
           </div>
