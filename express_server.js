@@ -20,6 +20,20 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// Create a users Object (store user data)
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+}
+
 // Needs to come BEFORE all our routes.
 const bodyParser = require("body-parser");
 const { restart } = require("nodemon");
@@ -117,6 +131,13 @@ app.post("/logout", (req, res) => {
   // Make sure to use "username" with quotes...
   res.redirect("/urls");
 });
+
+app.get("/register", (req, res) => {
+  // res.send("")
+  const templateVars = { username: req.cookies["username"] };
+  res.render("registration", templateVars);
+});
+
 
 //Should be at the bottom?
 app.listen(PORT, () => {
