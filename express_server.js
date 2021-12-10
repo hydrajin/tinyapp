@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -21,19 +22,24 @@ const urlDatabase = {
 };
 
 // Create a users Object (store user data)
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-}
+let users = {};
+// users.push({email: newEmail, password: newPassword});
+// console.log('users', users);
+// res.redirect('/');
+// {
+//   "userRandomID": {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "purple-monkey-dinosaur"
+//   },
+//   "user2RandomID": {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "dishwasher-funk"
+//   }
+// }
 
+// MIDDLEWARE
 // Needs to come BEFORE all our routes.
 const bodyParser = require("body-parser");
 const { restart } = require("nodemon");
@@ -56,8 +62,9 @@ app.get("/hello", (req, res) => {
 
 // add a new route handler for "/urls" and use res.render() to pass the URL data to our template
 app.get("/urls", (req, res) => {
-  console.log("username", req.cookies);
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
+  const templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
 });
 // templateVars object contains the object urlDatabase? under the key urls
@@ -65,15 +72,19 @@ app.get("/urls", (req, res) => {
 
 // Need 2 new routes: GET route to render urls_new.ejs (presents form to user)
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
+  const templateVars = { user };
   res.render("urls_new", templateVars);
 });
 // the order of the route definition matters! (Get /urls/new needs to be defined before GET /urls/:id)
 // A good rule of thumb to follow: Routes should be ordered from MOST specific to LEAST specific
-// HAD to add a template vars to this route in order to get code/username working!! 
+// HAD to add a template vars to this route in order to get code/username working!!
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user };
   // Fixed the longURL: (urlData)
   res.render("urls_show", templateVars);
 });
@@ -119,31 +130,56 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/login", (req, res) => {
   let username = req.body.username;
   res.cookie("username", username);
-  // console.log("Cookie Created!", req.cookies["username"]);
-  //res.cookie("username", username, { expires: new Date(Date.now() + 900000), httpOnly: true });
   // res.send("SUCESSFULLY LOGGED IN!");
   res.redirect("/urls");
 });
 
 // Add a POST route to logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
-  // Make sure to use "username" with quotes...
+  res.clearCookie("user_id"); // changed to "user_id"
   res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
   // res.send("")
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { user: null }; // nothing in there yet
   res.render("registration", templateVars);
 });
 
+// Make a most request!!
+app.post("/register", (req, res) => {
+  const id = generateRandomString();
+  const newEmail = req.body.email;
+  const newPassword = req.body.password;
+
+  
+  const newUser = { id: id, email: newEmail, password: newPassword };
+  users[id] = newUser;
+  
+  // Set a user_id cookie
+
+
+  res.cookie("user_id", id);
+  //  console.log(user_id);
+  // res.redirect('/');
+  // redirect to /register.json to c2heck new user creation
+  // res.redirect("/register.json");
+  // users.push({email: newEmail, password: newPassword});
+  // console.log('users', users);
+  res.redirect('/urls');
+});
+
+
+// Check users database to see account registration
+app.get("/register.json", (req, res) => {
+  res.json(users);
+});
 
 //Should be at the bottom?
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
+  
 // * Visit: localhost:8080/urls.json {"b2xVn2":"http://www.lighthouselabs.ca","9sm5xK":"http://www.google.com"}
 // Use cURL to fetch the url: curl -i http://localhost:8080/hello
 
@@ -153,4 +189,4 @@ In fact, a is not defined in this scope, and will result in a reference error wh
 
 // * Express convention of using views (EJS automatically knows to look inside the views directory for any template files with .ejs extension)
 /* When sending variables to an EJS template, we need to send them inside an object, even if we are only sending one variable.
- This is so we can use the key of that variable (in the above case the key is urls) to access the data within our template. */
+This is so we can use the key of that variable (in the above case the key is urls) to access the data within our template. */
