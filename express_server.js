@@ -23,12 +23,18 @@ const urlDatabase = {
 
 // Create a users Object (store user data)
 let users = {
-
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "123"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "123"
   }
+
+
 };
 // users.push({email: newEmail, password: newPassword});
 // console.log('users', users);
@@ -137,11 +143,35 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // Add a POST route to a login page
 app.post("/login", (req, res) => {
-  let user_id = req.body.email;
-  // res.cookie("user_id", user_id);
+  const email = req.body.email;
+  const password = req.body.password;
+  let userExists = false;
+  for (const user of Object.values(users)) {
+    // console.log(user);
+    // console.log(user.password);
+    if (user.email === email && user.password === password) {
+      userExists = true;
+      res.cookie("user_id", user.id);
+    }
+  }
   // res.send("SUCESSFULLY LOGGED IN!");
-  res.redirect("/urls");
+  // res.render("login");
+  if (userExists) {
+    res.redirect("/urls");
+  } else {
+    res.status(403).send("Account does not exist/Your login is incorrect");
+  }
 });
+
+app.get("/login", (req, res) => {
+  // const user_id = req.cookies["user_id"];
+  // const email = req.body.email;
+  // const password = req.body.password;
+
+  const templateVars = { user: null };
+  res.render("login", templateVars);
+});
+
 
 // Add a POST route to logout
 app.post("/logout", (req, res) => {
@@ -151,12 +181,12 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   // res.send("")
-  let user_id = req.body.email;
+  // let user_id = req.body.email;
   const templateVars = { user: null }; // null! nothing in there yet
   res.render("registration", templateVars);
 });
 
-// Make a most request!!
+// Make a post request!!
 app.post("/register", (req, res) => {
   const id = generateRandomString();
   // const user_id = req.cookies["user_id"];
@@ -175,7 +205,7 @@ app.post("/register", (req, res) => {
   // redirect to /register.json to check new user creation
   // res.redirect("/register.json");
   res.redirect('/urls');
-  
+
   users[id] = { id, email, password };
   // Have to keep this below the conditionals
 

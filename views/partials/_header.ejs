@@ -15,9 +15,16 @@
     </div>
   </form>
   <% if(!user){ %>
-    <form class="form-inline" style="display: inline-right" action="/login" method="POST">
-      <input class="form-control" type="text" name="username" placeholder="username" style="width: 250px; margin-right: 1em">
-      <button type="submit" class="btn btn-outline-light" color="grey">Login</button>
+    <div>
+      <a href="/Login">
+      <button type="submit" class="btn btn-outline-link" color="grey" style="margin-right: 1em">Login</button>
+    </div>
+  </a>
+    <div>
+      <a href="/register">
+      <button type="submit" class="btn btn-outline-link" color="grey">Register</button>
+      </a>    
+    </div>
        <!-- No idea how to move this! -->
   <% } else{ %>  
     <label style="margin-right: 2em">Logged in as: <%=  user.email %></label>
