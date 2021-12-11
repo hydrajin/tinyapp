@@ -16,14 +16,15 @@
   </form>
   <% if(!user){ %>
     <div>
-      <a href="/Login">
-      <button type="submit" class="btn btn-outline-link" color="grey" style="margin-right: 1em">Login</button>
+      <a class="nav-item nav-link" color="grey" href="/login">Login</a>
+      <!--<a href="/login">
+      <button type="submit" class="btn btn-outline-link" color="grey" style="margin-right: 1em">Login</button>-->
     </div>
-  </a>
+  
     <div>
-      <a href="/register">
-      <button type="submit" class="btn btn-outline-link" color="grey">Register</button>
-      </a>    
+      <!--<a href="/register">
+      <button type="submit" class="btn btn-outline-link" color="grey">Register</button>-->
+      <a class="nav-item nav-link" color="grey" href="/register">Register</a>
     </div>
        <!-- No idea how to move this! -->
   <% } else{ %>  
