@@ -14,15 +14,15 @@
         <!--How do I align/move the login to the right side?-->
     </div>
   </form>
-  <% if(user){ %>
-    <!-- No idea how to move this! -->
-    <label style="margin-right: 2em">Logged in as: <%=  user.email %></label>
-    <form class="form-inline" style="display: inline-right" action="/logout" method="POST">
-    <button type="submit" class="btn btn-outline-light">Logout</button>
-  <% } else{ %>  
+  <% if(!user){ %>
     <form class="form-inline" style="display: inline-right" action="/login" method="POST">
       <input class="form-control" type="text" name="username" placeholder="username" style="width: 250px; margin-right: 1em">
       <button type="submit" class="btn btn-outline-light" color="grey">Login</button>
+       <!-- No idea how to move this! -->
+  <% } else{ %>  
+    <label style="margin-right: 2em">Logged in as: <%=  user.email %></label>
+    <form class="form-inline" style="display: inline-right" action="/logout" method="POST">
+    <button type="submit" class="btn btn-outline-light">Logout</button>
  <% } %>
  </form>
   </nav>

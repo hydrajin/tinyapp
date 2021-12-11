@@ -22,7 +22,14 @@ const urlDatabase = {
 };
 
 // Create a users Object (store user data)
-let users = {};
+let users = {
+
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  }
+};
 // users.push({email: newEmail, password: newPassword});
 // console.log('users', users);
 // res.redirect('/');
@@ -39,10 +46,12 @@ let users = {};
 //   }
 // }
 
+
 // MIDDLEWARE
 // Needs to come BEFORE all our routes.
 const bodyParser = require("body-parser");
 const { restart } = require("nodemon");
+const { response } = require("express");
 app.use(bodyParser.urlencoded({ extended: true }));
 // Converts the req. body from a buffer into a string (which we can read)
 // data in the input field wil be available to us in the req.body.longURL variable, which we can store in our urlDatabase object (Later)
@@ -128,8 +137,8 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // Add a POST route to a login page
 app.post("/login", (req, res) => {
-  let username = req.body.username;
-  res.cookie("username", username);
+  let user_id = req.body.email;
+  // res.cookie("user_id", user_id);
   // res.send("SUCESSFULLY LOGGED IN!");
   res.redirect("/urls");
 });
@@ -142,33 +151,46 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   // res.send("")
-  const templateVars = { user: null }; // nothing in there yet
+  let user_id = req.body.email;
+  const templateVars = { user: null }; // null! nothing in there yet
   res.render("registration", templateVars);
 });
 
 // Make a most request!!
 app.post("/register", (req, res) => {
   const id = generateRandomString();
-  const newEmail = req.body.email;
-  const newPassword = req.body.password;
+  // const user_id = req.cookies["user_id"];
+  const email = req.body.email;
+  const password = req.body.password;
 
-  
-  const newUser = { id: id, email: newEmail, password: newPassword };
-  users[id] = newUser;
-  
+  // users[id] = newUser;
+  // Prevent Registration with blank email/password
+  if (email === "" || password === "") {
+    return res.status(400).send("Please enter a valid email and password");
+  } else if (emailExists(email)) {
+    res.status(400).send("This email already exists ");
+  }
   // Set a user_id cookie
-
-
   res.cookie("user_id", id);
-  //  console.log(user_id);
-  // res.redirect('/');
-  // redirect to /register.json to c2heck new user creation
+  // redirect to /register.json to check new user creation
   // res.redirect("/register.json");
-  // users.push({email: newEmail, password: newPassword});
-  // console.log('users', users);
   res.redirect('/urls');
+  
+  users[id] = { id, email, password };
+  // Have to keep this below the conditionals
+
 });
 
+// Duplicate email checking function
+const emailExists = (email) => {
+  for (const key in users) {
+    if (users[key].email === email) {
+      return true;
+      // res.send("The username already exists!");
+    }
+  }
+  return false;
+};
 
 // Check users database to see account registration
 app.get("/register.json", (req, res) => {
@@ -179,7 +201,7 @@ app.get("/register.json", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-  
+
 // * Visit: localhost:8080/urls.json {"b2xVn2":"http://www.lighthouselabs.ca","9sm5xK":"http://www.google.com"}
 // Use cURL to fetch the url: curl -i http://localhost:8080/hello
 
