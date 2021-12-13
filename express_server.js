@@ -3,17 +3,26 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 // Storing passwords securely
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
 // console.log(salt);
 // const password = "purple-monkey-dinosaur"; // found in the req.params object
 
-
-app.use(cookieParser()); // I didn't add this after declaring cookie parser...
-
 app.set("view engine", "ejs");
 // set ejs as the view engine
+
+
+// COOKIES
+app.use(cookieParser()); // I didn't add this after declaring cookie parser...
+app.use(cookieSession({
+  name: "session",
+  keys: ["pizzaisprettyawesome"],
+  userID: undefined,
+}));
+
+
 
 // For now place it in the out-most (global) scope
 // eslint wanted a named function?
@@ -114,13 +123,13 @@ app.get("/hello", (req, res) => {
 // Need 2 new routes: GET route to render urls_new.ejs (presents form to user)
 // Redirect if someone is not logged in and trying to acess /urls/new
 app.get("/urls/new", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["userID"];
   // const email = req.body.email;
   if (userID === undefined) {
     // .set('Content-Type', 'text/html').
     return res.status(403).send(`Please <a href='/login'> login<a/> or  <a href='/register'> register</a>`);
   }
-  // const user_id = req.cookies["user_id"];
+  // const userID = req.cookies["userID"];
   const user = users[userID];
   const templateVars = { user }; //! urls: urlDatabase,
   res.render("urls_new", templateVars);
@@ -131,7 +140,7 @@ app.get("/urls/new", (req, res) => {
 
 
 app.get("/urls/:shortURL", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["userID"];
   const user = users[userID];
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL]["longURL"];
@@ -141,20 +150,20 @@ app.get("/urls/:shortURL", (req, res) => {
   //Check if urserID equals shortURLID
   if (userID === shortUrlID) {
     const templateVars = { shortURL, longURL, user };
-    res.render("urls_show", templateVars);
+   return res.render("urls_show", templateVars);
   }
   return res.send(`Access denied! <a href='/urls'> Return to My URLS <a/>`);
 });
 
 // add a new route handler for "/urls" and use res.render() to pass the URL data to our template
 app.get("/urls", (req, res) => {
-  const user_id = req.cookies["user_id"];
-  const user = users[user_id];
+  const userID = req.session["userID"];
+  const user = users[userID];
   if (!user) {
     //.set('Content-Type', 'text/html')
     return res.status(403).send(`Please <a href='/login'> login<a/> or  <a href='/register'> register</a>`);
   }
-  const urls = urlsForUserId(user_id);
+  const urls = urlsForUserId(userID);
 
   // only need key since values have same key name...
   const templateVars = { urls, user };
@@ -168,9 +177,9 @@ app.get("/urls", (req, res) => {
 // Update the server so that shortURL-longURL key-value pairs are saved to the urlDatabase when it recieves a POST request to /urls
 app.post("/urls", (req, res) => {
   // console.log(req.body);  // Log the POST request body to the console
-  const userID = req.cookies["user_id"];
-  // const user = users[user_id];
-  //if(user_id !== null || user_id !== undefined)
+  const userID = req.cookies["userID"];
+  // const user = users[userID];
+  //if(userID !== null || userID !== undefined)
   if (userID === undefined) {
     // res.status(403).set('Content-Type', 'text/html').send("Your login is incorrect Please <a href='/login'>Try again</a>");
   }
@@ -185,7 +194,7 @@ app.post("/urls", (req, res) => {
 // Sends an OK message when submitted, { longURL: 'www.pokemon.com'} in terminal
 
 app.get("/u/:shortURL", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["userID"];
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL]["longURL"];
 
@@ -202,14 +211,14 @@ app.get("/u/:shortURL", (req, res) => {
 // Add a POST route that removes a URL resource: POST /urls/:shortURL/delete
 app.post("/urls/:shortURL/delete", (req, res) => {
   // ! I was missing the "/" before urls! make note for next time!
-  // Nally lecture (1:31:43)  const userID = req.cookies["user_id"];
-  const userID = req.cookies["user_id"];
+  // Nally lecture (1:31:43)  const userID = req.cookies["userID"];
+  const userID = req.session["userID"];
   const shortURL = req.params.shortURL;
   const shortUrlID = urlDatabase[shortURL]["userID"];
 
   if (userID === shortUrlID) {
     delete urlDatabase[shortURL];
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
   return res.status("403").send("You can't delete someone elses shortURL! <a href='/urls'>Return to My URLS</a>");
 });
@@ -222,8 +231,8 @@ app.post("/urls/:shortURL", (req, res) => {
   // Changes existing shortURL to a NEW longURL
   const shortURL = req.params.shortURL;
   // const longURL = req.body.longURL;
-  const userID = req.cookies["user_id"];
-  // const user = users[user_id];
+  const userID = req.session["userID"];
+  // const user = users[userID];
   urlDatabase[shortURL] = { longURL: req.body.longURL, userID };
   res.redirect("/urls");
 });
@@ -245,13 +254,16 @@ app.post("/login", (req, res) => {
       const passwordMatching = bcrypt.compareSync(password, user.password);
       if (passwordMatching) {
         userExists = true;
-        res.cookie("user_id", user.id);
-      // } else {
+        // const userID = req.session["userID"];
+        res.cookie("userID", user.id);
+        req.session.userID = user.id;
+        return res.redirect("/urls");
+       } else {
+        return res.status(403).set('Content-Type', 'text/html').send("Your login is incorrect Please <a href='/login'>Try again</a>");
       //   //! ERROR PAGE IS HTML (res.set...)
       //   // res.set('Content-Type', 'text/html'); 
       }
     }
-    return res.status(403).set('Content-Type', 'text/html').send("Your login is incorrect Please <a href='/login'>Try again</a>");
   }
 
   // res.send("SUCESSFULLY LOGGED IN!");
@@ -264,13 +276,13 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const user_id = req.cookies["user_id"];
-  if (user_id !== undefined) {
-    // const user = users[user_id];
+  const userID = req.session["userID"];
+  if (userID !== undefined) {
+    // const user = users[userID];
     // const templateVars = { urls: urlDatabase, user };
     res.redirect("/urls");
   } else {
-    const templateVars = { user: null };
+    const templateVars = { user: users[userID] }; // ! used to be null!
     res.render("login", templateVars);
   }
 });
@@ -278,14 +290,16 @@ app.get("/login", (req, res) => {
 
 // Add a POST route to logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id"); // changed to "user_id"
+  res.clearCookie("userID"); // changed to "userID"
+  res.clearCookie("session.sig");
+  res.clearCookie("session");
   return res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
-  const user_id = req.cookies["user_id"];
-  if (user_id !== undefined) {
-    // const user = users[user_id];
+  const userID = req.session["userID"];
+  if (userID !== undefined) {
+    // const user = users[userID];
     // const templateVars = { urls: urlDatabase, user };
     return res.redirect("/urls");
   } else {
@@ -297,7 +311,7 @@ app.get("/register", (req, res) => {
 // Make a post request!!
 app.post("/register", (req, res) => {
   const id = generateRandomString();
-  // const user_id = req.cookies["user_id"];
+  // const userID = req.cookies["userID"];
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
@@ -309,8 +323,12 @@ app.post("/register", (req, res) => {
   } else if (emailExists(email)) {
     return res.status(400).send("This email already exists <a href='/login'>Return to Login</a>");
   }
-  // Set a user_id cookie
-  res.cookie("user_id", id);
+  for (const user of Object.values(users)) {
+  // Set a userID cookie
+  res.cookie("userID", user.id);
+  req.session.userID = user.id;
+  }
+  // req.cookie.id = id;
   // redirect to /register.json to check new user creation
   // res.redirect("/register.json");
   res.redirect('/urls');
