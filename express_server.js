@@ -3,6 +3,12 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require("cookie-parser");
+// Storing passwords securely
+const bcrypt = require('bcryptjs');
+const salt = bcrypt.genSaltSync(10);
+// console.log(salt);
+// const password = "purple-monkey-dinosaur"; // found in the req.params object
+
 
 app.use(cookieParser()); // I didn't add this after declaring cookie parser...
 
@@ -47,18 +53,21 @@ const urlsForUserId = (id) => {
   return result;
 };
 
+const user1Password = "123";
+const user2Password = "abc";
+
 
 // Create a users Object (store user data)
 let users = {
   "aJ48lW": {
     id: "aJ48lW",
     email: "8@8.com",
-    password: "123"
+    password: bcrypt.hashSync(user1Password, salt)
   },
   "k2J3N3": {
     id: "k2J3N3",
-    email: "user2@example.com",
-    password: "123"
+    email: "a@a.com",
+    password: bcrypt.hashSync(user2Password, salt)
   }
 
 
@@ -223,6 +232,8 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  // const hashedPassword = bcrypt.hashSync(password, 10);
+  // console.log(bcrypt.compareSync("123", hashedPassword)); // returns true
   let userExists = false;
 
 
@@ -230,15 +241,17 @@ app.post("/login", (req, res) => {
     // console.log(user);
     // console.log(user.password);
     if (user.email === email) {
-      if (user.password === password) {
+      // user.password === password
+      const passwordMatching = bcrypt.compareSync(password, user.password);
+      if (passwordMatching) {
         userExists = true;
         res.cookie("user_id", user.id);
-      } else {
-        //! ERROR PAGE IS HTML (res.set...)
-        // res.set('Content-Type', 'text/html');
-        return res.status(403).set('Content-Type', 'text/html').send("Your login is incorrect Please <a href='/login'>Try again</a>");
+      // } else {
+      //   //! ERROR PAGE IS HTML (res.set...)
+      //   // res.set('Content-Type', 'text/html'); 
       }
     }
+    return res.status(403).set('Content-Type', 'text/html').send("Your login is incorrect Please <a href='/login'>Try again</a>");
   }
 
   // res.send("SUCESSFULLY LOGGED IN!");
@@ -287,6 +300,7 @@ app.post("/register", (req, res) => {
   // const user_id = req.cookies["user_id"];
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   // users[id] = newUser;
   // Prevent Registration with blank email/password
@@ -301,7 +315,7 @@ app.post("/register", (req, res) => {
   // res.redirect("/register.json");
   res.redirect('/urls');
 
-  users[id] = { id, email, password };
+  users[id] = { id, email, hashedPassword };
   // Have to keep this below the conditionals
 });
 
