@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 const express = require("express");
+const emailExists = require("./helpers.js");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -14,8 +15,6 @@ const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
 // console.log(salt);
 // const password = "purple-monkey-dinosaur"; // found in the req.params object
-
-
 
 
 // COOKIES
@@ -73,8 +72,8 @@ let users = {
   "k2J3N3": {
     id: "k2J3N3",
     email: "a@a.com",
-    // password: bcrypt.hashSync(user2Password, 10)
-    password: "$2a$10$0pRZ8DkTzumYIJ509eph2ORQcAmxpG4VZY27HACDYg03nB3PoFlBS"
+    password: bcrypt.hashSync(user2Password, 10)
+    // password: "$2a$10$0pRZ8DkTzumYIJ509eph2ORQcAmxpG4VZY27HACDYg03nB3PoFlBS"
   },
   "aJ48lW": {
     id: "aJ48lW",
@@ -84,7 +83,7 @@ let users = {
 
   },
 };
-console.log(users);
+// console.log(users);
 // users.push({email: newEmail, password: newPassword});
 // console.log('users', users);
 // res.redirect('/');
@@ -147,7 +146,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session["userID"];
   const shortURL = req.params.shortURL;
   const urlData = urlDatabase[shortURL];
-  console.log(urlData);
+  // console.log(urlData);
   // urlDatabase[shortURL] = {longURL: req.body.longURL, user };
 
   if (!urlData) {
@@ -259,10 +258,8 @@ app.post("/login", (req, res) => {
   // const hashedPassword = bcrypt.hashSync(password, 10);
   // console.log(bcrypt.compareSync("123", hashedPassword)); // returns true
   // let userExists = false;
-  const findUserByEmail = emailExists(email);
-  // console.log("Find User By Email:", findUserByEmail);
-
-
+  const findUserByEmail = emailExists(email, users);
+  console.log("Find User By Email:", findUserByEmail);
   // console.log("Password Match", passwordMatch);
   // return res.end("TEST123");
 
@@ -394,15 +391,15 @@ app.post("/register", (req, res) => {
   // Have to keep this below the conditionals
 });
 
-// Duplicate email checking function
-const emailExists = (email, users) => {
-  for (const key in users) {
-    if (users[key].email === email) {
-      return users[key];
-    }
-  }
-  return false;
-};
+// // Duplicate email checking function
+// const emailExists = (email) => {
+//   for (const key in users) {
+//     if (users[key].email === email) {
+//       return users[key];
+//     }
+//   }
+//   return false;
+// };
 
 // Check users database to see account registration
 app.get("/register.json", (req, res) => {
@@ -413,6 +410,8 @@ app.get("/register.json", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
 
 // * Visit: localhost:8080/urls.json {"b2xVn2":"http://www.lighthouselabs.ca","9sm5xK":"http://www.google.com"}
 // Use cURL to fetch the url: curl -i http://localhost:8080/hello
