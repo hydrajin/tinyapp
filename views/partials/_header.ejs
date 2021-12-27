@@ -10,27 +10,20 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new" style="margin-right: 35em">Create New URL</a>
-        <!--How do I align/move the login to the right side?-->
+        <a class="nav-item nav-link" href="/urls/new" >Create New URL</a>
     </div>
   </form>
   <% if(!user){ %>
-    <div>
+    <div class="navbar-nav ml-auto"></div>
       <a class="nav-item nav-link" color="grey" href="/login">Login</a>
-      <!--<a href="/login">
-      <button type="submit" class="btn btn-outline-link" color="grey" style="margin-right: 1em">Login</button>-->
-    </div>
-  
-    <div>
-      <!--<a href="/register">
-      <button type="submit" class="btn btn-outline-link" color="grey">Register</button>-->
       <a class="nav-item nav-link" color="grey" href="/register">Register</a>
     </div>
-       <!-- No idea how to move this! -->
   <% } else{ %>  
-    <label style="margin-right: 2em">Logged in as: <%=  user.email %></label>
-    <form class="form-inline" style="display: inline-right" action="/logout" method="POST">
-    <button type="submit" class="btn btn-outline-light">Logout</button>
+    <div class="navbar-nav ml-auto">
+    <label class="nav-item nav-link" style="margin-right: 1.5em">Logged in as: <%=  user.email %></label>
+    <form action="/logout" method="POST">
+    <button type="submit" class="btn btn-outline-light" style="margin-top:0.25em">Logout</button>
+  </div>
  <% } %>
  </form>
   </nav>
