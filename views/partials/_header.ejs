@@ -20,9 +20,9 @@
     </div>
   <% } else{ %>  
     <div class="navbar-nav ml-auto">
-    <label class="nav-item nav-link" style="margin-right: 1.5em">Logged in as: <%=  user.email %></label>
+    <label class="nav-item nav-link" style="margin: 0.25em 1.5em 0 0">Logged in as: <%=  user.email %></label>
     <form action="/logout" method="POST">
-    <button type="submit" class="btn btn-outline-light" style="margin-top:0.25em">Logout</button>
+    <button type="submit" class="btn btn-outline-light" style="margin-top: 0.25em">Logout</button>
   </div>
  <% } %>
  </form>
